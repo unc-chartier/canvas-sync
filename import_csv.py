@@ -7,16 +7,21 @@ import logging.config
 import os
 import time
 import shutil
+import ConfigParser
 from pprint import pprint
 
 
 # 1. Define inputs for the POST/GET request
 # Example: https://ian.test.instructure.com/api/v1/accounts/'
 connection_url = 'https://unco.test.instructure.com/api/v1/accounts/self/'
-transfer_header = {'Authorization': 'Bearer 7227~RFa0UUpk9INTxSQU8KD5JRQ6AG1DB1lyildYtWOkgKj6bph16m9iD9zGLEkacVeD'}
+config = ConfigParser.ConfigParser()
+config.read("token.txt")
+token_test = config.get("token_file", "token_test")
+token = ('Bearer %s' % token_test)
+transfer_header = {'Authorization': token}
 # Parameters specific to the initial POST request
 mypath = 'CSV_extracts/'
-file_name = 'inst_role_export.csv'
+file_name = 'chartier_extract_test.csv'
 myfile = mypath + file_name
 api_payload = {'import_type': 'instructure_csv', 'extension': 'csv'}
 api_data = open(myfile, 'rb').read()
@@ -96,15 +101,16 @@ def main():
         pprint(r2json)
         # Set var to display the import progress
         percent_done = r2json['progress']
-        # Reset var to know when to end the loop.
+        # Reset var ended to know when to end the loop.
         ended = r2json['ended_at']
         if ended is None:
-            logging.info("Wait five minutes and try again. %s percent done." % percent_done)
+            logging.info("Wait five minutes and check import status again. %s percent done." % percent_done)
             time.sleep(300)
         else:
             try:
                 # log the warning messages that are returned.
-                for v in rjson['processing_warnings']:
+                logging.error("Importing %s to %s" % (myfile, connection_url))
+                for v in r2json['processing_warnings']:
                     logging.error(v)
             except:  # when importing there will be no processing warnings
                 logging.debug("No processing warnings returned")

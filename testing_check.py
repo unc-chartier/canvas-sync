@@ -1,11 +1,16 @@
 import requests
 import json
 import time
+import ConfigParser
 from pprint import pprint
 
 
+config = ConfigParser.ConfigParser()
+config.read("token.txt")
+token_test = config.get("token_file", "token_test")
+token = ('Bearer %s' % token_test)
 base_url = 'https://unco.test.instructure.com/api/v1/accounts/self/'
-header = {'Authorization': 'Bearer 7227~RFa0UUpk9INTxSQU8KD5JRQ6AG1DB1lyildYtWOkgKj6bph16m9iD9zGLEkacVeD'}
+header = {'Authorization': token}
 
 
 def request_status(header, import_id):
@@ -23,7 +28,7 @@ ended = None
 
 
 while ended is None:
-    import_id = 7
+    import_id = 11
     r2 = request_status(header, import_id)
     r2json = parsejson(r2)
     pprint(r2json)
